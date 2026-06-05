@@ -6,12 +6,7 @@ Cross-platform hra vytvorená pomocou Django (web aplikácia), Pygame (desktop k
 
 # Cieľ projektu
 
-Vytvoriť hybridnú hru Piškvorky 20x20, ktorá umožní:
-
-* hrať online cez webový prehliadač,
-* stiahnuť desktop verziu,
-* synchronizovať výsledky cez REST API,
-* zobrazovať rebríček najlepších hráčov.
+Cieľom projektu je vytvoriť jednoduchú single-player hru Piškvorky 20x20, kde hráč hrá proti počítaču (AI). Hra bude dostupná ako webová aplikácia a desktop verzia, pričom výsledky sa budú synchronizovať na server.
 
 ---
 
@@ -44,20 +39,21 @@ Po prihlásení sa zobrazí:
 ## D. Web hra
 
 6. Používateľ klikne na políčko.
-7. Django spracuje ťah.
-8. Hracia plocha sa obnoví.
-9. Kontroluje sa podmienka 5 symbolov v rade.
-10. Výsledok hry sa uloží.
+7. Django spracuje ťah hráča.
+8. Ak hra neskončila, automaticky vykoná ťah počítač (AI).
+9. Hracia plocha sa obnoví.
+10. Kontroluje sa podmienka 5 symbolov v rade.
+11. Výsledok hry sa uloží.
 
 ## E. Desktop verzia
 
-11. Používateľ stiahne aplikáciu.
-12. Hrá offline.
-13. Výsledky sa ukladajú lokálne.
+12. Používateľ stiahne aplikáciu.
+13. Hrá offline.
+14. Výsledky sa ukladajú lokálne.
 
 ## F. Synchronizácia
 
-14. Po pripojení na internet:
+15. Po pripojení na internet:
 
 * desktop klient odošle výsledky na server,
 * server aktualizuje štatistiky.
@@ -81,6 +77,12 @@ Win rate:
 
 wins / (wins + losses)
 
+## H. AI systém (web aj desktop)
+AI hrá náhodne / alebo podľa jednoduchých pravidiel:
+* blokuje 4 v rade
+* preferuje víťazný ťah
+* inak random
+
 ---
 
 # Architektúra
@@ -97,24 +99,22 @@ wins / (wins + losses)
 │----------------------------│
 │ Login / Register           │
 │ Leaderboard                │
-│ Game Logic                 │
-│ REST API                   │
+│ Game Logic (PvE vs AI)     │
+│ REST API (results sync)    │
 └────────────┬───────────────┘
              │
-      ┌──────┴──────┐
-      ▼             ▼
+             ▼
+┌────────────────────────────┐
+│     SQLITE / POSTGRESQL    │
+└────────────────────────────┘
 
-┌────────────────┐   ┌─────────────────┐
-│ PostgreSQL     │   │ REST API Layer  │
-│ alebo SQLite   │   │ /api/results/   │
-└────────────────┘   └────────┬────────┘
-                               │
-                               ▼
-
-                   ┌────────────────────┐
-                   │   PYGAME CLIENT    │
-                   │ Offline Desktop    │
-                   └────────────────────┘
+(optional)
+┌────────────────────────────┐
+│      PYGAME CLIENT         │
+│   Offline single-player    │
+│ Local result storage       │
+│ Sync via REST API          │
+└────────────────────────────┘
 ```
 
 ---
@@ -125,7 +125,7 @@ wins / (wins + losses)
 
 * id
 * username
-* password
+* password (hashed via Django auth system)
 
 ## PlayerStats
 
@@ -151,11 +151,6 @@ def win_rate(self):
 * board_size = 20
 * moves_count
 * timestamp
-
-## OfflineQueue
-
-* local results
-* synced (true / false)
 
 ---
 
@@ -247,30 +242,31 @@ Výsledok:
 Endpointy:
 
 * POST /api/results/
+→ uloží výsledok hry (win/loss/draw)
+
 * GET /api/leaderboard/
+→ vracia TOP 10 hráčov
+
+* POST /api/sync/
+→ sync desktop výsledkov (voliteľné)
 
 Výsledok:
 
 ✔ Komunikácia klient ↔ server
 
-## Fáza 5 – Pygame klient
+## Fáza 5 – PC verzia
 
-* offline hra
-* lokálne výsledky
-
-Výsledok:
-
-✔ Desktop verzia
+* offline desktop verzia hry (Pygame client)
 
 ## Fáza 6 – Synchronizácia
 
-* kontrola internetu
-* odosielanie výsledkov
-* retry mechanizmus
+* desktop klient odošle uložené výsledky na server
+* server aktualizuje PlayerStats
+* implementácia REST API komunikácie
 
 Výsledok:
 
-✔ Offline + online režim
+✔ offline + online sync výsledkov
 
 ## Fáza 7 – Finálny systém
 
@@ -296,7 +292,7 @@ Výsledok:
 * SQLite
 * PostgreSQL
 * JSON
-* REST API
+* HTTP / REST API
 * Git
 * GitHub
 * VS Code

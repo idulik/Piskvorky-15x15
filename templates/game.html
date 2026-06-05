@@ -1,0 +1,21 @@
+<h1>Piškvorky 20x20</h1>
+
+<p>Na ťahu: {{ turn }}</p>
+
+<table border="1">
+    {% for row in board %}
+    <tr>
+        {% for cell in row %}
+        <td>
+            {% if cell %}
+                {{ cell }}
+            {% else %}
+                <a href="/move/{{ forloop.parentloop.counter0 }}/{{ forloop.counter0 }}/">
+                    .
+                </a>
+            {% endif %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endfor %}
+</table>
