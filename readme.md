@@ -292,7 +292,6 @@ Výsledok:
 * Django REST Framework
 * HTML
 * CSS
-* JavaScript
 * Pygame
 * SQLite
 * PostgreSQL
