@@ -1,0 +1,17 @@
+<table border="1">
+    <tr>
+        <th>Meno</th>
+        <th>Výhry</th>
+        <th>Prehry</th>
+        <th>Win rate</th>
+    </tr>
+
+    {% for player in players %}
+    <tr>
+        <td>{{ player.user.username }}</td>
+        <td>{{ player.wins }}</td>
+        <td>{{ player.losses }}</td>
+        <td>{{ player.win_rate }}%</td>
+    </tr>
+    {% endfor %}
+</table>
