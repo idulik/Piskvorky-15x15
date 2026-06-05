@@ -1,21 +1,25 @@
-<h1>Piškvorky 20x20</h1>
+<h2 class="title">Piškvorky 20x20</h2>
 
-<p>Na ťahu: {{ turn }}</p>
+<p class="turn">Na rade: {{ turn }}</p>
 
-<table border="1">
+{% if winner %}
+    <h2 class="winner">Vyhral: {{ winner }}</h2>
+{% endif %}
+
+<div class="board">
     {% for row in board %}
-    <tr>
         {% for cell in row %}
-        <td>
+
             {% if cell %}
-                {{ cell }}
+                <div class="cell {{ cell|lower }}">
+                    {{ cell }}
+                </div>
             {% else %}
-                <a href="/move/{{ forloop.parentloop.counter0 }}/{{ forloop.counter0 }}/">
-                    .
+                <a class="cell empty"
+                   href="{% url 'move' forloop.parentloop.counter0 forloop.counter0 %}">
                 </a>
             {% endif %}
-        </td>
+
         {% endfor %}
-    </tr>
     {% endfor %}
-</table>
+</div>

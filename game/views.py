@@ -11,28 +11,153 @@ def leaderboard(request):
 
 BOARD_SIZE = 20
 
-# jednoduchý "fake memory" (na začiatok)
-GAME_STATE = {
-    "board": [[None for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)],
-    "turn": "X",
-    "winner": None
-}
-
 # view pre hru
 def game_view(request):
-    return render(request, "game.html", GAME_STATE)
+
+    if "board" not in request.session:
+        request.session["board"] = [
+            [None for _ in range(20)]
+            for _ in range(20)
+        ]
+        request.session["turn"] = "X"
+        request.session["winner"] = None
+
+    return render(request, "game.html", {
+        "board": request.session["board"],
+        "turn": request.session["turn"],
+        "winner": request.session["winner"],
+    })
+
+    return render(request, "game.html", context)
+
+# pridanie AI
+import random
+def get_empty_cells(board):
+    cells = []
+    for x in range(20):
+        for y in range(20):
+            if board[x][y] is None:
+                cells.append((x, y))
+    return cells
+
+def score_position(board, x, y, player):
+    directions = [(1,0), (0,1), (1,1), (1,-1)]
+    score = 0
+
+    opponent = "X" if player == "O" else "O"
+
+    for dx, dy in directions:
+
+        count_player = 0
+        count_opponent = 0
+
+        for i in range(-4, 5):
+            nx, ny = x + dx*i, y + dy*i
+
+            if 0 <= nx < 20 and 0 <= ny < 20:
+                if board[nx][ny] == player:
+                    count_player += 1
+                elif board[nx][ny] == opponent:
+                    count_opponent += 1
+
+        # vlastné línie sú dôležité
+        if count_player == 2:
+            score += 10
+        elif count_player == 3:
+            score += 50
+        elif count_player == 4:
+            score += 200
+
+        # blokovanie hráča je ešte dôležitejšie
+        if count_opponent == 2:
+            score += 15
+        elif count_opponent == 3:
+            score += 80
+        elif count_opponent == 4:
+            score += 300
+
+    # bonus za stred (strategia)
+    center = 10
+    score += 20 - (abs(x - center) + abs(y - center))
+
+    return score
+
+def ai_move(board):
+
+    empty = get_empty_cells(board)
+
+    if not empty:
+        return None
+
+    best_score = -1
+    best_move = None
+
+    for x, y in empty:
+        score = score_position(board, x, y, "O")
+
+        if score > best_score:
+            best_score = score
+            best_move = (x, y)
+
+    return best_move
+
+    # 1. random ťah (default)
+    return random.choice(empty)
 
 # view na ťah, každé kliknutie = request
 def move(request, x, y):
-    global GAME_STATE
 
-    if GAME_STATE["winner"]:
+    board = request.session.get("board")
+    turn = request.session.get("turn")
+    winner = request.session.get("winner")
+
+    if winner:
         return redirect("game")
 
-    if GAME_STATE["board"][x][y] is None:
-        GAME_STATE["board"][x][y] = GAME_STATE["turn"]
+    # PLAYER MOVE
+    if board[x][y] is None:
+        board[x][y] = "X"
 
-        # switch hráča
-        GAME_STATE["turn"] = "O" if GAME_STATE["turn"] == "X" else "X"
+        # AI MOVE
+        ai_x, ai_y = ai_move(board)
+
+        if ai_x is not None:
+            board[ai_x][ai_y] = "O"
+
+    # uloženie
+    request.session["board"] = board
+    request.session.modified = True
 
     return redirect("game")
+
+def check_winner(board, x, y, player):
+    # jednoduchá verzia (horizont + vertikál + diagonály)
+    directions = [(1,0), (0,1), (1,1), (1,-1)]
+
+    for dx, dy in directions:
+        count = 1
+
+        # dopredu
+        i = 1
+        while True:
+            nx, ny = x + dx*i, y + dy*i
+            if 0 <= nx < 20 and 0 <= ny < 20 and board[nx][ny] == player:
+                count += 1
+                i += 1
+            else:
+                break
+
+        # dozadu
+        i = 1
+        while True:
+            nx, ny = x - dx*i, y - dy*i
+            if 0 <= nx < 20 and 0 <= ny < 20 and board[nx][ny] == player:
+                count += 1
+                i += 1
+            else:
+                break
+
+        if count >= 5:
+            return player
+
+    return None
