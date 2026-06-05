@@ -104,6 +104,44 @@ def ai_move(board):
     # 1. random ťah (default)
     return random.choice(empty)
 
+def check_winner_simple(board, x, y, player):
+    directions = [
+        (1, 0),   # vertikálne
+        (0, 1),   # horizontálne
+        (1, 1),   # diagonála \
+        (1, -1),  # diagonála /
+    ]
+
+    size = len(board)
+
+    for dx, dy in directions:
+        count = 1
+
+        # dopredu
+        i = 1
+        while True:
+            nx, ny = x + dx * i, y + dy * i
+            if 0 <= nx < size and 0 <= ny < size and board[nx][ny] == player:
+                count += 1
+                i += 1
+            else:
+                break
+
+        # dozadu
+        i = 1
+        while True:
+            nx, ny = x - dx * i, y - dy * i
+            if 0 <= nx < size and 0 <= ny < size and board[nx][ny] == player:
+                count += 1
+                i += 1
+            else:
+                break
+
+        if count >= 5:
+            return True
+
+    return False
+
 # view na ťah, každé kliknutie = request
 def move(request, x, y):
 
@@ -114,18 +152,29 @@ def move(request, x, y):
     if winner:
         return redirect("game")
 
-    # PLAYER MOVE
     if board[x][y] is None:
         board[x][y] = "X"
 
-        # AI MOVE
-        ai_x, ai_y = ai_move(board)
+        # CHECK PLAYER WIN
+        if check_winner_simple(board, x, y, "X"):
+            winner = "X"
 
-        if ai_x is not None:
-            board[ai_x][ai_y] = "O"
+        else:
+            # AI MOVE
+            ai_pos = ai_move(board)
 
-    # uloženie
+            if ai_pos:
+                ax, ay = ai_pos
+                board[ax][ay] = "O"
+
+                # CHECK AI WIN
+                if check_winner_simple(board, x, y, turn):
+                    winner = turn
+
     request.session["board"] = board
+    request.session["turn"] = turn
+    request.session["winner"] = winner
+
     request.session.modified = True
 
     return redirect("game")
@@ -161,3 +210,13 @@ def check_winner(board, x, y, player):
             return player
 
     return None
+
+def reset(request):
+    request.session["board"] = [
+        [None for _ in range(20)] for _ in range(20)
+    ]
+    request.session["turn"] = "X"
+    request.session["winner"] = None
+
+    request.session.modified = True
+    return redirect("game")

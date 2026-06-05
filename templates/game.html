@@ -23,3 +23,86 @@
         {% endfor %}
     {% endfor %}
 </div>
+
+<a href="{% url 'reset' %}">
+    <button>Restart game</button>
+</a>
+
+<style>
+
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+}
+
+.title {
+    margin-top: 20px;
+}
+
+.turn {
+    margin-bottom: 15px;
+    opacity: 0.8;
+}
+
+/* BOARD */
+.board {
+    display: grid;
+    grid-template-columns: repeat(20, 28px);
+    justify-content: center;
+    gap: 3px;
+    margin: 20px auto;
+}
+
+/* POLÍČKA */
+.cell {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 16px;
+    transition: 0.15s;
+}
+
+/* prázdne políčko */
+.cell.empty {
+    background: #1e293b;
+    cursor: pointer;
+}
+
+.cell.empty:hover {
+    background: #334155;
+    transform: scale(1.1);
+}
+
+/* X */
+.cell.x {
+    background: #ef4444;
+    color: white;
+    animation: pop 0.2s ease-in-out;
+}
+
+/* O */
+.cell.o {
+    background: #3b82f6;
+    color: white;
+    animation: pop 0.2s ease-in-out;
+}
+
+/* animácia */
+@keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* winner text */
+.winner {
+    color: #22c55e;
+    margin: 10px;
+}
+
+</style>
