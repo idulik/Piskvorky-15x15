@@ -4,6 +4,7 @@
 from django.shortcuts import render
 from django.contrib import messages
 from .forms import RegisterForm
+import traceback
 
 def register(request):
     success = False
@@ -27,6 +28,7 @@ def register(request):
 
             except Exception as e:
                 print("REGISTER SAVE ERROR:", e)
+                traceback.print_exc()
 
         else:
             print("REGISTER FORM INVALID")
