@@ -30,12 +30,12 @@ ALLOWED_HOSTS = [
     "localhost",
     "127.0.0.1",
     "piskvorky.e-da.sk",
-    ".onrender.com",
+    "piskvorky-x4x1.onrender.com",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://piskvorky.e-da.sk",
-    "https://*.onrender.com",
+    "https://piskvorky-x4x1.onrender.com",
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
