@@ -141,7 +141,30 @@ def ai_move(board):
     best_score = -1
     best_move = None
 
+    # 4. pridanie kontroly
+    def is_bad_move(board, x, y):
+        board[x][y] = "O"
+
+        # skontroluj všetky možné odpovede hráča
+        for i in range(20):
+            for j in range(20):
+                if board[i][j] is None:
+                    board[i][j] = "X"
+
+                    if check_winner_simple(board, i, j, "X"):
+                        board[i][j] = None
+                        board[x][y] = None
+                        return True
+
+                    board[i][j] = None
+
+        board[x][y] = None
+        return False
+
     for x, y in empty:
+        if is_bad_move(board, x, y):
+            continue
+
         score = score_position(board, x, y, "O")
 
         if score > best_score:
