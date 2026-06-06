@@ -1,27 +1,115 @@
-<h2>Register</h2>
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+</head>
 
-<form method="post">
-    {% csrf_token %}
+<body>
 
-    <div>
-        <label>Username</label>
-        {{ form.username }}
-    </div>
+<div class="register-box">
 
-    <div>
-        <label>Email</label>
-        {{ form.email }}
-    </div>
+    <h2>Register</h2>
 
-    <div>
-        <label>Password</label>
-        {{ form.password1 }}
-    </div>
+    <form method="post">
+        {% csrf_token %}
 
-    <div>
-        <label>Repeat password</label>
-        {{ form.password2 }}
-    </div>
+        <div class="field">
+            <label>Username</label>
+            {{ form.username }}
+        </div>
 
-    <button type="submit">Vytvoriť účet</button>
-</form>
+        <div class="field">
+            <label>Email</label>
+            {{ form.email }}
+        </div>
+
+        <div class="field">
+            <label>Password</label>
+            {{ form.password1 }}
+        </div>
+
+        <div class="field">
+            <label>Repeat password</label>
+            {{ form.password2 }}
+        </div>
+
+        <button type="submit">Vytvoriť účet</button>
+    </form>
+
+</div>
+
+<style>
+    body {
+        margin: 0;
+        height: 100vh;
+
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        font-family: Arial, sans-serif;
+
+        background: #0f172a;
+    }
+
+    .register-box {
+        width: 360px;
+        padding: 30px;
+
+        background: rgba(255, 255, 255, 0.12);
+        backdrop-filter: blur(10px);
+
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+
+        color: white;
+    }
+
+    h2 {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .field {
+        margin-bottom: 12px;
+    }
+
+    label {
+        display: block;
+        margin-bottom: 4px;
+        font-size: 14px;
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+
+        border: none;
+        border-radius: 8px;
+
+        outline: none;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        margin-top: 10px;
+
+        border: none;
+        border-radius: 8px;
+
+        background: #00c6ff;
+        color: white;
+        font-weight: bold;
+
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: #009edb;
+    }
+</style>
+
+</body>
+</html>
