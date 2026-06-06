@@ -9,28 +9,28 @@
 
 <div class="register-box">
 
-    <h2>Register</h2>
+    <h2>Registrácia</h2>
 
     <form method="post">
         {% csrf_token %}
 
         <div class="field">
-            <label>Username</label>
+            <label>Username:</label>
             {{ form.username }}
         </div>
 
         <div class="field">
-            <label>Email</label>
+            <label>E-mail:</label>
             {{ form.email }}
         </div>
 
         <div class="field">
-            <label>Password</label>
+            <label>Password:</label>
             {{ form.password1 }}
         </div>
 
         <div class="field">
-            <label>Repeat password</label>
+            <label>Repeat password:</label>
             {{ form.password2 }}
         </div>
 
