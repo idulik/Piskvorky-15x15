@@ -32,10 +32,12 @@ ALLOWED_HOSTS = [
     os.environ.get("RENDER_EXTERNAL_HOSTNAME"),
     "localhost",
     "127.0.0.1",
+    "piskvorky.e-da.sk",
 ]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://piskvorky-x4x1.onrender.com",
+    "https://piskvorky.e-da.sk",
 ]
 
 # Application definition
