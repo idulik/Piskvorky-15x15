@@ -1,18 +1,89 @@
-<h1>Piškvorky 20x20</h1>
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Piškvorky 20x20</title>
+</head>
 
-<p>Vitaj v hre!</p>
+<body>
+
+<h1>🎮 Vitaj v projekte Piškvorky 20x20</h1>
+
+<div class="content">
+
+    <p>
+        Piškvorky 20x20 sú klasická strategická hra rozšírená o webovú aplikáciu, desktopového klienta a online štatistiky hráčov.
+    </p>
+
+    <p>
+        Cieľ hry je jednoduchý – spojiť 5 rovnakých symbolov v rade na hracej ploche 20x20 polí.
+        Za jednoduchými pravidlami sa však skrýva komplexnejší systém, ktorý kombinuje hranie cez webový prehliadač,
+        desktopovú aplikáciu a online rebríček hráčov.
+    </p>
+
+    <p>
+        Po registrácii získaš prístup k online verzii hry priamo v prehliadači a zároveň si môžeš stiahnuť desktopovú
+        verziu vytvorenú v Pygame. Výsledky hier sa ukladajú do databázy a premietajú sa do rebríčka najúspešnejších hráčov.
+    </p>
+
+    <p>
+        Zaregistruj sa, zahraj si partiu a pokús sa dostať do TOP 10 hráčov.
+    </p>
+
+    <p>
+        Tento projekt vzniká ako súčasť môjho štúdia programovania a postupne sa rozširuje o nové funkcie.
+        Každá odohraná hra pomáha testovať, overovať a vylepšovať celý systém.
+    </p>
+
+    <b>Použité technológie:</b> Python, Django, Django REST Framework (REST API), Pygame, HTML a CSS, SQLite / PostgreSQL
+• JSON komunikácia, Git a GitHub, Visual Studio Code
+
+    <p>
+        Projekt demonštruje návrh databázového modelu, správu používateľov, vývoj webovej aplikácie,
+        tvorbu REST API, synchronizáciu dát medzi klientom a serverom a implementáciu desktopovej aplikácie v jazyku Python.
+    </p>
+
+</div>
+
+<hr>
 
 {% if user.is_authenticated %}
 
-    <p>Prihlásený ako: {{ user.username }}</p>
+    <h2>Vitaj späť!</h2>
+
+    <p>Prihlásený ako: <b>{{ user.username }}</b></p>
 
     <a href="{% url 'game' %}">
-        <button>Spustiť hru</button>
+        <button>▶ Spustiť hru</button>
     </a>
+
+    <a href="{% url 'logout' %}">
+        <button>🚪 Odhlásiť sa</button>
+    </a>
+
+    <hr>
+
+    <h2>🏆 Top 10 hráči</h2>
+
+    <table>
+        <tr>
+            <th>Hráč</th>
+            <th>Výhry</th>
+            <th>Prehry</th>
+        </tr>
+
+        {% for p in top_players %}
+        <tr>
+            <td>{{ p.user.username }}</td>
+            <td>{{ p.wins }}</td>
+            <td>{{ p.losses }}</td>
+        </tr>
+        {% endfor %}
+    </table>
 
 {% else %}
 
-    <h2>Login</h2>
+    <h2>🔐 Prihlásenie</h2>
 
     <form method="post">
         {% csrf_token %}
@@ -26,3 +97,70 @@
     </p>
 
 {% endif %}
+
+<!-- ================= CSS ================= -->
+<style>
+
+body {
+    font-family: Arial;
+    background: #0f172a;
+    color: white;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+}
+
+/* subtitle text */
+.content {
+    max-width: 100%;
+    margin: auto;
+    text-align: left;
+    line-height: 1.6;
+    opacity: 0.9;
+}
+
+/* tech list */
+.tech {
+    list-style: none;
+    padding: 0;
+}
+
+.tech li {
+    background: #1e293b;
+    margin: 5px;
+    padding: 6px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* table */
+table {
+    margin: 10px auto;
+    border-collapse: collapse;
+    border: 3px solid white;
+}
+
+th, td {
+    border: 3px solid #555;
+    padding: 8px 14px;
+}
+
+/* buttons */
+button {
+    margin: 5px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: none;
+}
+
+/* hr */
+hr {
+    margin: 20px 0;
+    opacity: 0.3;
+}
+
+</style>
+
+</body>
+</html>

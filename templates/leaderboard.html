@@ -1,4 +1,19 @@
-<table border="1">
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard - Piškvorky</title>
+</head>
+
+<body>
+
+<h1>🏆 Leaderboard</h1>
+
+<p class="subtitle">
+    Rebríček najlepších hráčov podľa výhier a prehier
+</p>
+
+<table>
     <tr>
         <th>Meno</th>
         <th>Výhry</th>
@@ -11,7 +26,20 @@
         <td>{{ player.user.username }}</td>
         <td>{{ player.wins }}</td>
         <td>{{ player.losses }}</td>
-        <td>{{ player.win_rate }}%</td>
+        <td>
+            {% if player.wins|add:player.losses > 0 %}
+                {{ player.wins|floatformat:2 }} / {{ player.losses|add:player.wins }}
+            {% else %}
+                0%
+            {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </table>
+
+<a href="{% url 'home' %}">
+    <button>← Späť na hlavnú stránku</button>
+</a>
+
+</body>
+</html>

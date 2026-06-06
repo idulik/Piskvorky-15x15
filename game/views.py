@@ -3,10 +3,14 @@ from .models import PlayerStats
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.shortcuts import redirect
 
 
 def home(request):
     form = AuthenticationForm()
+
+    top_players = PlayerStats.objects.all().order_by('-wins', 'losses')[:10]
 
     if request.method == "POST":
         form = AuthenticationForm(data=request.POST)
@@ -16,8 +20,13 @@ def home(request):
             return redirect("home")
 
     return render(request, "home.html", {
-        "form": form
+        "form": form,
+        "top_players": top_players
     })
+
+def logout_view(request):
+    logout(request)
+    return redirect("home")
 
 def leaderboard(request):
     players = PlayerStats.objects.all().order_by(
