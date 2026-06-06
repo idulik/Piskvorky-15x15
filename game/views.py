@@ -17,6 +17,7 @@ def home(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
+            request.session.cycle_key()
             return redirect("home")
 
     return render(request, "home.html", {
