@@ -24,7 +24,12 @@ SECRET_KEY = 'django-insecure-p3msetgbkuo6ue7axf$7kltgh8^*3h-kg1vjenzs*sv6**vm*8
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = False
+
+import os
+
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
 ALLOWED_HOSTS = [
     "localhost",
@@ -32,6 +37,9 @@ ALLOWED_HOSTS = [
     "piskvorky.e-da.sk",
     "piskvorky-x4x1.onrender.com",
 ]
+
+if RENDER_HOST:
+    ALLOWED_HOSTS.append(RENDER_HOST)
 
 CSRF_TRUSTED_ORIGINS = [
     "https://piskvorky.e-da.sk",
