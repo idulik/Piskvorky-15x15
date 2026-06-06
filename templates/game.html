@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Piškvorky 20x20</title>
 </head>
 
@@ -176,7 +177,33 @@ button {
     }
 }
 
+.cell {
+    touch-action: manipulation;
+}
+
 </style>
+
+<script>
+document.querySelectorAll(".cell").forEach(cell => {
+    cell.addEventListener("click", function () {
+
+        const x = this.dataset.x;
+        const y = this.dataset.y;
+
+        window.location.href = `/move/${x}/${y}/`;
+    });
+
+    // lepšie pre mobil (touch optimalizácia)
+    cell.addEventListener("touchstart", function (e) {
+        e.preventDefault();
+
+        const x = this.dataset.x;
+        const y = this.dataset.y;
+
+        window.location.href = `/move/${x}/${y}/`;
+    }, { passive: false });
+});
+</script>
 
 </body>
 </html>
