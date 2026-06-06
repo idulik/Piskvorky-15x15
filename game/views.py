@@ -1,5 +1,23 @@
 from django.shortcuts import render, redirect
 from .models import PlayerStats
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+
+
+def home(request):
+    form = AuthenticationForm()
+
+    if request.method == "POST":
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            return redirect("home")
+
+    return render(request, "home.html", {
+        "form": form
+    })
 
 def leaderboard(request):
     players = PlayerStats.objects.all().order_by(
@@ -12,6 +30,7 @@ def leaderboard(request):
 BOARD_SIZE = 20
 
 # view pre hru
+@login_required
 def game_view(request):
 
     if "board" not in request.session:

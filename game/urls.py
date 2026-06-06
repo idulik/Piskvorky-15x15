@@ -3,6 +3,7 @@ from .views import leaderboard, game_view, move, reset
 
 urlpatterns = [
     path("leaderboard/", leaderboard, name="leaderboard"),
+    path("", views.home, name="home"),
 
 # hra
     path("", game_view, name="game"),

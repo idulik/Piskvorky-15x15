@@ -1,0 +1,28 @@
+<h1>Piškvorky 20x20</h1>
+
+<p>Vitaj v hre!</p>
+
+{% if user.is_authenticated %}
+
+    <p>Prihlásený ako: {{ user.username }}</p>
+
+    <a href="{% url 'game' %}">
+        <button>Spustiť hru</button>
+    </a>
+
+{% else %}
+
+    <h2>Login</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Prihlásiť sa</button>
+    </form>
+
+    <p>
+        Nemáš účet?
+        <a href="/accounts/register/">Registrácia</a>
+    </p>
+
+{% endif %}
