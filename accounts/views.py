@@ -12,15 +12,26 @@ def register(request):
         form = RegisterForm(request.POST)
 
         if form.is_valid():
-            form.save()
+            print("REGISTER VALID")
 
-            messages.success(
-                request,
-                "Vaše konto bolo úspešne vytvorené. Môžete túto stránku zavrieť a vrátiť sa na úvodnú stránku, kde sa prihlásite pod svojím menom a heslom, ktoré ste zadali."
-            )
+            try:
+                user = form.save()
+                print("REGISTER SAVED OK:", user)
+                success = True
+                form = None
 
-            success = True
-            form = None  # skryjem formulár
+                messages.success(
+                    request,
+                    "Vaše konto bolo úspešne vytvorené. Môžete túto stránku zavrieť a vrátiť sa na úvodnú stránku, kde sa prihlásite pod svojím menom a heslom, ktoré ste zadali."
+                )
+
+            except Exception as e:
+                print("REGISTER SAVE ERROR:", e)
+
+        else:
+            print("REGISTER FORM INVALID")
+            print(form.errors)
+
     else:
         form = RegisterForm()
 
