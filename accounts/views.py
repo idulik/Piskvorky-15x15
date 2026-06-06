@@ -8,29 +8,32 @@ import traceback
 
 def register(request):
     success = False
-    form = RegisterForm()
 
     if request.method == "POST":
         form = RegisterForm(request.POST)
 
+        print("POST DATA:", request.POST)
+
         if form.is_valid():
+            print("REGISTER VALID")
+
             try:
                 user = form.save()
-                print("REGISTER OK:", user)
+                print("USER SAVED:", user.username)
 
-                messages.success(
-                    request,
-                    "Účet bol vytvorený."
-                )
-
+                messages.success(request, "Účet bol vytvorený.")
                 success = True
-                form = None
 
             except Exception as e:
-                print("REGISTER ERROR:", e)
+                print("REGISTER SAVE ERROR:", e)
                 traceback.print_exc()
+
         else:
-            print("FORM ERRORS:", form.errors)
+            print("REGISTER INVALID")
+            print(form.errors)
+
+    else:
+        form = RegisterForm()
 
     return render(request, "register.html", {
         "form": form,
