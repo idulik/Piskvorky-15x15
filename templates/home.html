@@ -80,14 +80,15 @@
 {% endif %}
 
 <!-- ===================== -->
-<!-- 🟢 LOGIN STAV -->
+<!-- LOGIN STAV -->
 <!-- ===================== -->
 
 {% if user.is_authenticated %}
 
-<div class="content">
+<div class="game-wrapper">
 
     <iframe 
+        id="gameFrame"
         src="{% url 'game' %}" 
         width="100%" 
         height="700px"
@@ -95,10 +96,12 @@
         scrolling="no">
     </iframe>
 
+    <form method="post" action="{% url 'reset' %}?from=home">
+        {% csrf_token %}
+        <button type="submit">🔄 Restart game</button>
+    </form>
+
 </div>
-<a href="{% url 'reset' %}">
-    <button>Restart game</button>
-</a>
 
 <hr>
 
@@ -209,6 +212,12 @@ iframe {
     border: none;
     display: block;
     overflow: hidden;
+}
+
+.game-wrapper {
+    max-width: 900px;
+    margin: 0 auto;   
+    text-align: center;
 }
 
 </style>

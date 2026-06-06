@@ -36,9 +36,10 @@
     {% endfor %}
 </div>
 
-<a href="{% url 'reset' %}">
-    <button>Restart game</button>
-</a>
+<form method="post" action="{% url 'reset' %}?from=game">
+    {% csrf_token %}
+    <button type="submit">🔄 Restart game</button>
+</form>
 
 <!--
 <h4>💻 Desktopová aplikácia</h4>
@@ -51,7 +52,7 @@
         <button>⬇ Stiahnuť desktopovú aplikáciu - v príprave!</button>
     </a>
 -->
-    
+
 <!-- ================= CSS ================= -->
 <style>
 
