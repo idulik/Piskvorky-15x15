@@ -57,9 +57,10 @@
         <button>▶ Spustiť hru</button>
     </a>
 
-    <a href="{% url 'logout' %}">
+    <form method="post" action="{% url 'logout' %}" style="display:inline;">
+        {% csrf_token %}
         <button>🚪 Odhlásiť sa</button>
-    </a>
+    </form>
 
     <hr>
 
