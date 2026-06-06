@@ -6,6 +6,13 @@ class PlayerStats(models.Model):
     wins = models.IntegerField(default=0)
     losses = models.IntegerField(default=0)
 
+    @property
+    def win_rate(self):
+        total = self.wins + self.losses
+        if total == 0:
+            return 0
+        return round((self.wins / total) * 100)
+
     def __str__(self):
         return self.user.username
 

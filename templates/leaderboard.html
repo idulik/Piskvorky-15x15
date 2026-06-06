@@ -18,7 +18,7 @@
         <th>Meno</th>
         <th>Výhry</th>
         <th>Prehry</th>
-        <th>Win rate</th>
+        <th>Úspešnosť</th>
     </tr>
 
     {% for player in players %}
@@ -26,13 +26,7 @@
         <td>{{ player.user.username }}</td>
         <td>{{ player.wins }}</td>
         <td>{{ player.losses }}</td>
-        <td>
-            {% if player.wins|add:player.losses > 0 %}
-                {{ player.wins|floatformat:2 }} / {{ player.losses|add:player.wins }}
-            {% else %}
-                0%
-            {% endif %}
-        </td>
+        <td>{{ p.win_rate }}%</td>
     </tr>
     {% endfor %}
 </table>

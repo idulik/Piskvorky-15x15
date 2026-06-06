@@ -123,6 +123,7 @@
         <th>Hráč</th>
         <th>Výhry</th>
         <th>Prehry</th>
+        <th>Úspešnosť</th>
     </tr>
 
     {% for p in top_players %}
@@ -130,6 +131,15 @@
         <td>{{ p.user.username }}</td>
         <td>{{ p.wins }}</td>
         <td>{{ p.losses }}</td>
+        <td>
+            {% if p.win_rate >= 70 %}
+                🟢 {{ p.win_rate }}%
+            {% elif p.win_rate >= 40 %}
+                🟡 {{ p.win_rate }}%
+            {% else %}
+                🔴 {{ p.win_rate }}%
+            {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </table>
