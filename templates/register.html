@@ -7,6 +7,16 @@
 
 <body>
 
+{% if messages %}
+    {% for message in messages %}
+        <div class="message">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if not success %}
+
 <div class="register-box">
 
     <h2>Registrácia</h2>
@@ -38,6 +48,8 @@
     </form>
 
 </div>
+
+{% endif %}
 
 <style>
     body {
@@ -109,6 +121,20 @@
     button:hover {
         background: #009edb;
     }
+
+    .message {
+    background: #22c55e;
+    color: black;
+
+    padding: 12px;
+    margin-bottom: 15px;
+
+    border-radius: 10px;
+
+    font-weight: bold;
+    text-align: center;
+    }
+
 </style>
 
 </body>
