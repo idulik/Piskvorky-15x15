@@ -60,112 +60,120 @@ def game_view(request):
 
 
 # pridanie AI
-import random
+""" import random 
 def get_empty_cells(board):
     cells = []
     for x in range(20):
         for y in range(20):
             if board[x][y] is None:
                 cells.append((x, y))
-    return cells
+    return cells"""
 
+# silnejšia heuristika
 def score_position(board, x, y, player):
     directions = [(1,0), (0,1), (1,1), (1,-1)]
-    score = 0
-
     opponent = "X" if player == "O" else "O"
+
+    score = 0
 
     for dx, dy in directions:
 
-        count_player = 0
-        count_opponent = 0
+        line = []
 
         for i in range(-4, 5):
             nx, ny = x + dx*i, y + dy*i
 
             if 0 <= nx < 20 and 0 <= ny < 20:
-                if board[nx][ny] == player:
-                    count_player += 1
-                elif board[nx][ny] == opponent:
-                    count_opponent += 1
+                line.append(board[nx][ny])
 
-        # vlastné línie sú dôležité
-        if count_player == 2:
-            score += 10
-        elif count_player == 3:
-            score += 50
-        elif count_player == 4:
+        # počítanie segmentov
+        max_run = 0
+        run = 0
+
+        for cell in line:
+            if cell == player:
+                run += 1
+                max_run = max(max_run, run)
+            else:
+                run = 0
+
+        # súper
+        opp_run = 0
+        max_opp = 0
+
+        for cell in line:
+            if cell == opponent:
+                opp_run += 1
+                max_opp = max(max_opp, opp_run)
+            else:
+                opp_run = 0
+
+        # hodnotenie
+        if max_run == 2:
+            score += 20
+        elif max_run == 3:
+            score += 120
+        elif max_run == 4:
+            score += 2000
+
+        if max_opp == 2:
+            score += 30
+        elif max_opp == 3:
             score += 200
+        elif max_opp == 4:
+            score += 3000
 
-        # blokovanie hráča je ešte dôležitejšie
-        if count_opponent == 2:
-            score += 15
-        elif count_opponent == 3:
-            score += 80
-        elif count_opponent == 4:
-            score += 300
-
-    # bonus za stred (strategia)
-    center = 10
-    score += 20 - (abs(x - center) + abs(y - center))
+    # stred
+    score += 10 - (abs(x - 10) + abs(y - 10))
 
     return score
 
+# AI skusa len relevantne tahy
+def get_candidate_moves(board):
+    moves = set()
+
+    for x in range(20):
+        for y in range(20):
+            if board[x][y] is not None:
+                for dx in [-1, 0, 1]:
+                    for dy in [-1, 0, 1]:
+                        nx, ny = x + dx, y + dy
+
+                        if 0 <= nx < 20 and 0 <= ny < 20:
+                            if board[nx][ny] is None:
+                                moves.add((nx, ny))
+
+    return list(moves)
+
+# AI move - optimalizovaná AI
 def ai_move(board):
 
-    empty = get_empty_cells(board)
+    empty = get_candidate_moves(board)
 
     if not empty:
         return None
 
-    # 1. AI vie vyhrať
+    # 1. WIN MOVE
     for x, y in empty:
         board[x][y] = "O"
-
         if check_winner_simple(board, x, y, "O"):
             board[x][y] = None
             return (x, y)
-
         board[x][y] = None
 
-    # 2. Hráč vie vyhrať -> blokuj
+    # 2. BLOCK PLAYER WIN
     for x, y in empty:
         board[x][y] = "X"
-
         if check_winner_simple(board, x, y, "X"):
             board[x][y] = None
             return (x, y)
-
         board[x][y] = None
 
-    # 3. Pôvodná heuristika
-    best_score = -1
+    # 3. BEST MOVE (HEURISTIC)
+    best_score = -999999
     best_move = None
 
-    # 4. pridanie kontroly
-    def is_bad_move(board, x, y):
-        board[x][y] = "O"
-
-        # skontroluj všetky možné odpovede hráča
-        for i in range(20):
-            for j in range(20):
-                if board[i][j] is None:
-                    board[i][j] = "X"
-
-                    if check_winner_simple(board, i, j, "X"):
-                        board[i][j] = None
-                        board[x][y] = None
-                        return True
-
-                    board[i][j] = None
-
-        board[x][y] = None
-        return False
-
     for x, y in empty:
-        if is_bad_move(board, x, y):
-            continue
-
         score = score_position(board, x, y, "O")
 
         if score > best_score:
@@ -173,6 +181,9 @@ def ai_move(board):
             best_move = (x, y)
 
     return best_move
+
+
+
 
 def check_winner_simple(board, x, y, player):
     directions = [
@@ -260,7 +271,7 @@ def move(request, x, y):
 
     return redirect("game")
 
-def check_winner(board, x, y, player):
+"""def check_winner(board, x, y, player):
     # jednoduchá verzia (horizont + vertikál + diagonály)
     directions = [(1,0), (0,1), (1,1), (1,-1)]
 
@@ -290,7 +301,7 @@ def check_winner(board, x, y, player):
         if count >= 5:
             return player
 
-    return None
+    return None"""
 
 def reset(request):
     request.session["board"] = [
