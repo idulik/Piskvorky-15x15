@@ -11,7 +11,7 @@
 <!-- SPOLOČNÝ NADPIS -->
 <!-- ===================== -->
 
-<h1>Vitaj v projekte Piškvorky 20x20</h1>
+<h1>Vitajte v projekte Piškvorky 20x20</h1>
 
 <hr>
 
@@ -98,14 +98,14 @@
 
     <form method="post" action="{% url 'reset' %}?from=home">
         {% csrf_token %}
-        <button type="submit">🔄 Restart game</button>
+        <button type="submit">🔄 Reštart hry</button>
     </form>
 
 </div>
 
 <hr>
 
-<h2>👋 Vitaj späť!</h2>
+<h2>👋 Vitajte späť!</h2>
 
 <p>Prihlásený ako: <b>{{ user.username }}</b></p>
 

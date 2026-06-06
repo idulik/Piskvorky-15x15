@@ -4,8 +4,12 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
-from django.shortcuts import redirect
 
+import math
+
+# =========================
+# AUTH
+# =========================
 
 def home(request):
     form = AuthenticationForm()
@@ -25,21 +29,21 @@ def home(request):
         "top_players": top_players
     })
 
+
 def logout_view(request):
     logout(request)
     return redirect("home")
 
-def leaderboard(request):
-    players = PlayerStats.objects.all().order_by(
-        '-wins',
-        'losses'
-    )[:10]
 
+def leaderboard(request):
+    players = PlayerStats.objects.all().order_by('-wins', 'losses')[:10]
     return render(request, "leaderboard.html", {"players": players})
 
-BOARD_SIZE = 20
 
-# view pre hru
+# =========================
+# GAME VIEW
+# =========================
+
 @login_required
 def game_view(request):
 
@@ -48,133 +52,444 @@ def game_view(request):
             [None for _ in range(20)]
             for _ in range(20)
         ]
-        request.session["turn"] = "X"
         request.session["winner"] = None
 
     return render(request, "game.html", {
         "board": request.session["board"],
-        "turn": request.session["turn"],
         "winner": request.session["winner"],
         "last_ai_move": request.session.get("last_ai_move")
     })
 
 
-# pridanie AI
-""" import random 
-def get_empty_cells(board):
-    cells = []
-    for x in range(20):
-        for y in range(20):
-            if board[x][y] is None:
-                cells.append((x, y))
-    return cells"""
+# =========================
+# GAME CONSTANTS
+# =========================
 
-# silnejšia heuristika
-def score_position(board, x, y, player):
+SIZE = 20
+AI = "O"
+HUMAN = "X"
+
+
+# =========================
+# WIN CHECK
+# =========================
+
+def check_winner_simple(board, x, y, player):
     directions = [(1,0), (0,1), (1,1), (1,-1)]
-    opponent = "X" if player == "O" else "O"
+
+    for dx, dy in directions:
+        count = 1
+
+        i = 1
+        while 0 <= x + dx*i < SIZE and 0 <= y + dy*i < SIZE and board[x + dx*i][y + dy*i] == player:
+            count += 1
+            i += 1
+
+        i = 1
+        while 0 <= x - dx*i < SIZE and 0 <= y - dy*i < SIZE and board[x - dx*i][y - dy*i] == player:
+            count += 1
+            i += 1
+
+        if count >= 5:
+            return True
+
+    return False
+
+
+# =========================
+# FAST MOVE GENERATOR
+# =========================
+
+def get_moves(board):
+
+    moves = []
+
+    center = SIZE // 2
+
+    for x in range(SIZE):
+        for y in range(SIZE):
+
+            if board[x][y] is not None:
+                continue
+
+            found = False
+
+            for dx in range(-3, 4):
+                for dy in range(-3, 4):
+
+                    nx = x + dx
+                    ny = y + dy
+
+                    if (
+                        0 <= nx < SIZE and
+                        0 <= ny < SIZE and
+                        board[nx][ny] is not None
+                    ):
+                        found = True
+                        break
+
+                if found:
+                    break
+
+            if found:
+                priority = move_priority(board, x, y)
+                moves.append((-priority, x, y))
+
+    if not moves:
+        return [(center, center)]
+
+    moves.sort()
+
+    return [(x, y) for _, x, y in moves[:20]]
+
+
+def count_line(board, x, y, dx, dy, player):
+
+    count = 1
+    open_ends = 0
+
+    i = 1
+    while (
+        0 <= x + dx * i < SIZE and
+        0 <= y + dy * i < SIZE and
+        board[x + dx * i][y + dy * i] == player
+    ):
+        count += 1
+        i += 1
+
+    if (
+        0 <= x + dx * i < SIZE and
+        0 <= y + dy * i < SIZE and
+        board[x + dx * i][y + dy * i] is None
+    ):
+        open_ends += 1
+
+    i = 1
+    while (
+        0 <= x - dx * i < SIZE and
+        0 <= y - dy * i < SIZE and
+        board[x - dx * i][y - dy * i] == player
+    ):
+        count += 1
+        i += 1
+
+    if (
+        0 <= x - dx * i < SIZE and
+        0 <= y - dy * i < SIZE and
+        board[x - dx * i][y - dy * i] is None
+    ):
+        open_ends += 1
+
+    return count, open_ends
+
+def evaluate_pattern(count, open_ends):
+
+    if count >= 5:
+        return 1000000
+
+    # OPEN FOUR
+    if count == 4 and open_ends == 2:
+        return 500000
+
+    # CLOSED FOUR
+    if count == 4 and open_ends == 1:
+        return 100000
+
+    # OPEN THREE
+    if count == 3 and open_ends == 2:
+        return 5000
+
+    # CLOSED THREE
+    if count == 3 and open_ends == 1:
+        return 500
+
+    # OPEN TWO
+    if count == 2 and open_ends == 2:
+        return 100
+
+    # CLOSED TWO
+    if count == 2 and open_ends == 1:
+        return 20
+
+    return 0
+
+# =========================
+# EVALUATION (FAST)
+# =========================
+
+def evaluate_board(board):
 
     score = 0
 
-    for dx, dy in directions:
+    directions = [
+        (1, 0),
+        (0, 1),
+        (1, 1),
+        (1, -1)
+    ]
 
-        line = []
+    for x in range(SIZE):
+        for y in range(SIZE):
 
-        for i in range(-4, 5):
-            nx, ny = x + dx*i, y + dy*i
+            player = board[x][y]
 
-            if 0 <= nx < 20 and 0 <= ny < 20:
-                line.append(board[nx][ny])
+            if player is None:
+                continue
 
-        # počítanie segmentov
-        max_run = 0
-        run = 0
+            for dx, dy in directions:
 
-        for cell in line:
-            if cell == player:
-                run += 1
-                max_run = max(max_run, run)
-            else:
-                run = 0
+                count, open_ends = count_line(
+                    board,
+                    x,
+                    y,
+                    dx,
+                    dy,
+                    player
+                )
 
-        # súper
-        opp_run = 0
-        max_opp = 0
+                value = evaluate_pattern(
+                    count,
+                    open_ends
+                )
 
-        for cell in line:
-            if cell == opponent:
-                opp_run += 1
-                max_opp = max(max_opp, opp_run)
-            else:
-                opp_run = 0
-
-        # hodnotenie
-        if max_run == 2:
-            score += 20
-        elif max_run == 3:
-            score += 120
-        elif max_run == 4:
-            score += 2000
-
-        if max_opp == 2:
-            score += 30
-        elif max_opp == 3:
-            score += 200
-        elif max_opp == 4:
-            score += 3000
-
-    # stred
-    score += 10 - (abs(x - 10) + abs(y - 10))
+                if player == AI:
+                    score += value
+                else:
+                    score -= int(value * 1.3)
 
     return score
 
-# AI skusa len relevantne tahy
-def get_candidate_moves(board):
-    moves = set()
+def move_priority(board, x, y):
 
-    for x in range(20):
-        for y in range(20):
-            if board[x][y] is not None:
-                for dx in [-1, 0, 1]:
-                    for dy in [-1, 0, 1]:
-                        nx, ny = x + dx, y + dy
+    score = 0
 
-                        if 0 <= nx < 20 and 0 <= ny < 20:
-                            if board[nx][ny] is None:
-                                moves.add((nx, ny))
+    # základné skóre za okolie
+    for dx in range(-2, 3):
+        for dy in range(-2, 3):
 
-    return list(moves)
+            nx = x + dx
+            ny = y + dy
 
-# AI move - optimalizovaná AI
+            if 0 <= nx < SIZE and 0 <= ny < SIZE:
+
+                if board[nx][ny] == AI:
+                    score += 4
+
+                elif board[nx][ny] == HUMAN:
+                    score += 5
+
+    # BONUS za vytvorenie vlastnej štvorky
+    board[x][y] = AI
+
+    for dx, dy in [(1,0), (0,1), (1,1), (1,-1)]:
+
+        count, open_ends = count_line(
+            board,
+            x,
+            y,
+            dx,
+            dy,
+            AI
+        )
+
+        if count >= 4:
+            score += 50000
+
+    board[x][y] = None
+
+    # BONUS za blokovanie súperovej štvorky
+    board[x][y] = HUMAN
+
+    for dx, dy in [(1,0), (0,1), (1,1), (1,-1)]:
+
+        count, open_ends = count_line(
+            board,
+            x,
+            y,
+            dx,
+            dy,
+            HUMAN
+        )
+
+        if count >= 4:
+            score += 100000
+
+    board[x][y] = None
+
+    return score
+
+# =========================
+# MINIMAX (DEPTH 3)
+# =========================
+
+def minimax(board, depth, alpha, beta, maximizing):
+
+    if depth == 0:
+        return evaluate_board(board)
+
+    moves = get_moves(board)
+
+    if maximizing:
+        best = -math.inf
+
+        for x, y in moves:
+            board[x][y] = AI
+
+            if check_winner_simple(board, x, y, AI):
+                board[x][y] = None
+                return 10000000
+
+            val = minimax(board, depth-1, alpha, beta, False)
+            board[x][y] = None
+
+            best = max(best, val)
+            alpha = max(alpha, val)
+
+            if beta <= alpha:
+                break
+
+        return best
+
+    else:
+        best = math.inf
+
+        for x, y in moves:
+            board[x][y] = HUMAN
+
+            if check_winner_simple(board, x, y, HUMAN):
+                board[x][y] = None
+                return -10000000
+
+            val = minimax(board, depth-1, alpha, beta, True)
+            board[x][y] = None
+
+            best = min(best, val)
+            beta = min(beta, val)
+
+            if beta <= alpha:
+                break
+
+        return best
+
+
+# =========================
+# AI MOVE (FAST PRO)
+# =========================
+
 def ai_move(board):
 
-    empty = get_candidate_moves(board)
+    moves = get_moves(board)
 
-    if not empty:
-        return None
+    # okamžitá výhra
+    for x, y in moves:
 
-    # 1. WIN MOVE
-    for x, y in empty:
-        board[x][y] = "O"
-        if check_winner_simple(board, x, y, "O"):
+        board[x][y] = AI
+
+        if check_winner_simple(board, x, y, AI):
             board[x][y] = None
             return (x, y)
+
         board[x][y] = None
 
-    # 2. BLOCK PLAYER WIN
-    for x, y in empty:
-        board[x][y] = "X"
-        if check_winner_simple(board, x, y, "X"):
+    # okamžitý blok
+    for x, y in moves:
+
+        board[x][y] = HUMAN
+
+        if check_winner_simple(board, x, y, HUMAN):
             board[x][y] = None
             return (x, y)
+
         board[x][y] = None
 
-    # 3. BEST MOVE (HEURISTIC)
-    best_score = -999999
+    best_score = -math.inf
     best_move = None
 
-    for x, y in empty:
-        score = score_position(board, x, y, "O")
+    for x, y in moves:
+
+        board[x][y] = HUMAN
+
+        threat = False
+
+        for dx, dy in [(1,0),(0,1),(1,1),(1,-1)]:
+
+            count, open_ends = count_line(
+                board,
+                x,
+                y,
+                dx,
+                dy,
+                HUMAN
+            )
+
+            if count >= 4:
+                threat = True
+                break
+
+        board[x][y] = None
+
+        if threat:
+            return (x, y)
+    
+    # vytvor otvorenú štvorku
+
+    for x, y in moves:
+
+        board[x][y] = AI
+
+        for dx, dy in [(1,0),(0,1),(1,1),(1,-1)]:
+
+            count, open_ends = count_line(
+                board,
+                x,
+                y,
+                dx,
+                dy,
+                AI
+            )
+
+            if count == 4 and open_ends >= 1:
+                board[x][y] = None
+                return (x, y)
+
+        board[x][y] = None
+
+    # blokuj súperovu štvorku
+
+    for x, y in moves:
+
+        board[x][y] = HUMAN
+
+        for dx, dy in [(1,0),(0,1),(1,1),(1,-1)]:
+
+            count, open_ends = count_line(
+                board,
+                x,
+                y,
+                dx,
+                dy,
+                HUMAN
+            )
+
+            if count == 4 and open_ends >= 1:
+                board[x][y] = None
+                return (x, y)
+
+        board[x][y] = None
+
+    for x, y in moves:
+
+        board[x][y] = AI
+
+        score = minimax(
+            board,
+            2,
+            -math.inf,
+            math.inf,
+            False
+        )
+
+        board[x][y] = None
 
         if score > best_score:
             best_score = score
@@ -183,86 +498,52 @@ def ai_move(board):
     return best_move
 
 
+# =========================
+# MOVE VIEW
+# =========================
 
-
-def check_winner_simple(board, x, y, player):
-    directions = [
-        (1, 0),   # vertikálne
-        (0, 1),   # horizontálne
-        (1, 1),   # diagonála \
-        (1, -1),  # diagonála /
-    ]
-
-    size = len(board)
-
-    for dx, dy in directions:
-        count = 1
-
-        # dopredu
-        i = 1
-        while True:
-            nx, ny = x + dx * i, y + dy * i
-            if 0 <= nx < size and 0 <= ny < size and board[nx][ny] == player:
-                count += 1
-                i += 1
-            else:
-                break
-
-        # dozadu
-        i = 1
-        while True:
-            nx, ny = x - dx * i, y - dy * i
-            if 0 <= nx < size and 0 <= ny < size and board[nx][ny] == player:
-                count += 1
-                i += 1
-            else:
-                break
-
-        if count >= 5:
-            return True
-
-    return False
-
-# view na ťah, každé kliknutie = request
 def move(request, x, y):
 
     board = request.session.get("board")
     winner = request.session.get("winner")
+    if board is None:
+        return redirect("game")
 
     if winner:
         return redirect("game")
 
-    # hráč
     if board[x][y] is None:
-        board[x][y] = "X"
+        board[x][y] = HUMAN
 
-        if check_winner_simple(board, x, y, "X"):
-
+        if check_winner_simple(board, x, y, HUMAN):
             request.session["winner"] = "X"
 
             if request.user.is_authenticated:
-                stats = PlayerStats.objects.get(user=request.user)
+                stats, created = PlayerStats.objects.get_or_create(
+                    user=request.user
+                )
                 stats.wins += 1
                 stats.save()
 
             request.session["board"] = board
             return redirect("game")
 
-        # AI
+        # AI move
         ai_pos = ai_move(board)
 
         if ai_pos:
             ax, ay = ai_pos
-            board[ax][ay] = "O"
+            board[ax][ay] = AI
 
             request.session["last_ai_move"] = (ax, ay)
 
-            if check_winner_simple(board, ax, ay, "O"):
-
+            if check_winner_simple(board, ax, ay, AI):
                 request.session["winner"] = "O"
 
                 if request.user.is_authenticated:
-                    stats = PlayerStats.objects.get(user=request.user)
+                    stats, created = PlayerStats.objects.get_or_create(
+                        user=request.user
+                    ) 
                     stats.losses += 1
                     stats.save()
 
@@ -271,37 +552,10 @@ def move(request, x, y):
 
     return redirect("game")
 
-"""def check_winner(board, x, y, player):
-    # jednoduchá verzia (horizont + vertikál + diagonály)
-    directions = [(1,0), (0,1), (1,1), (1,-1)]
 
-    for dx, dy in directions:
-        count = 1
-
-        # dopredu
-        i = 1
-        while True:
-            nx, ny = x + dx*i, y + dy*i
-            if 0 <= nx < 20 and 0 <= ny < 20 and board[nx][ny] == player:
-                count += 1
-                i += 1
-            else:
-                break
-
-        # dozadu
-        i = 1
-        while True:
-            nx, ny = x - dx*i, y - dy*i
-            if 0 <= nx < 20 and 0 <= ny < 20 and board[nx][ny] == player:
-                count += 1
-                i += 1
-            else:
-                break
-
-        if count >= 5:
-            return player
-
-    return None"""
+# =========================
+# RESET
+# =========================
 
 def reset(request):
     request.session["board"] = [
@@ -317,4 +571,3 @@ def reset(request):
         return redirect("home")
 
     return redirect("game")
-
