@@ -301,3 +301,4 @@ def reset(request):
 
     request.session.modified = True
     return redirect("game")
+

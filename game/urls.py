@@ -9,6 +9,5 @@ urlpatterns = [
 # hra
     path("game/", views.game_view, name="game"),
     path("move/<int:x>/<int:y>/", move, name="move"),
-    path("reset/", reset, name="reset"),
-    path("logout/", views.logout_view, name="logout"),
+    path("reset/", reset, name="reset"),    
 ]
