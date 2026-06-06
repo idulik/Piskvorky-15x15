@@ -26,9 +26,9 @@ def game_view(request):
         "board": request.session["board"],
         "turn": request.session["turn"],
         "winner": request.session["winner"],
+        "last_ai_move": request.session.get("last_ai_move")
     })
 
-    return render(request, "game.html", context)
 
 # pridanie AI
 import random
@@ -89,6 +89,27 @@ def ai_move(board):
     if not empty:
         return None
 
+    # 1. AI vie vyhrať
+    for x, y in empty:
+        board[x][y] = "O"
+
+        if check_winner_simple(board, x, y, "O"):
+            board[x][y] = None
+            return (x, y)
+
+        board[x][y] = None
+
+    # 2. Hráč vie vyhrať -> blokuj
+    for x, y in empty:
+        board[x][y] = "X"
+
+        if check_winner_simple(board, x, y, "X"):
+            board[x][y] = None
+            return (x, y)
+
+        board[x][y] = None
+
+    # 3. Pôvodná heuristika
     best_score = -1
     best_move = None
 
@@ -100,9 +121,6 @@ def ai_move(board):
             best_move = (x, y)
 
     return best_move
-
-    # 1. random ťah (default)
-    return random.choice(empty)
 
 def check_winner_simple(board, x, y, player):
     directions = [
@@ -146,35 +164,46 @@ def check_winner_simple(board, x, y, player):
 def move(request, x, y):
 
     board = request.session.get("board")
-    turn = request.session.get("turn")
     winner = request.session.get("winner")
 
     if winner:
         return redirect("game")
 
+    # hráč
     if board[x][y] is None:
         board[x][y] = "X"
 
-        # CHECK PLAYER WIN
         if check_winner_simple(board, x, y, "X"):
-            winner = "X"
 
-        else:
-            # AI MOVE
-            ai_pos = ai_move(board)
+            request.session["winner"] = "X"
 
-            if ai_pos:
-                ax, ay = ai_pos
-                board[ax][ay] = "O"
+            if request.user.is_authenticated:
+                stats = PlayerStats.objects.get(user=request.user)
+                stats.wins += 1
+                stats.save()
 
-                # CHECK AI WIN
-                if check_winner_simple(board, x, y, turn):
-                    winner = turn
+            request.session["board"] = board
+            return redirect("game")
+
+        # AI
+        ai_pos = ai_move(board)
+
+        if ai_pos:
+            ax, ay = ai_pos
+            board[ax][ay] = "O"
+
+            request.session["last_ai_move"] = (ax, ay)
+
+            if check_winner_simple(board, ax, ay, "O"):
+
+                request.session["winner"] = "O"
+
+                if request.user.is_authenticated:
+                    stats = PlayerStats.objects.get(user=request.user)
+                    stats.losses += 1
+                    stats.save()
 
     request.session["board"] = board
-    request.session["turn"] = turn
-    request.session["winner"] = winner
-
     request.session.modified = True
 
     return redirect("game")
@@ -215,8 +244,8 @@ def reset(request):
     request.session["board"] = [
         [None for _ in range(20)] for _ in range(20)
     ]
-    request.session["turn"] = "X"
     request.session["winner"] = None
+    request.session["last_ai_move"] = None
 
     request.session.modified = True
     return redirect("game")

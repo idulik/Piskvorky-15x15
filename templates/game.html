@@ -1,6 +1,6 @@
 <h2 class="title">Piškvorky 20x20</h2>
 
-<p class="turn">Na rade: {{ turn }}</p>
+<p class="turn">Na rade: X</p>
 
 {% if winner %}
     <h2 class="winner">Vyhral: {{ winner }}</h2>
@@ -8,19 +8,24 @@
 
 <div class="board">
     {% for row in board %}
-        {% for cell in row %}
+        <div class="row">
+            {% for cell in row %}
 
-            {% if cell %}
-                <div class="cell {{ cell|lower }}">
-                    {{ cell }}
-                </div>
-            {% else %}
-                <a class="cell empty"
-                   href="{% url 'move' forloop.parentloop.counter0 forloop.counter0 %}">
-                </a>
-            {% endif %}
+                {% if cell == "X" %}
+                    <div class="cell x">X</div>
 
-        {% endfor %}
+                {% elif cell == "O" %}
+                    <div class="cell o {% if last_ai_move and forloop.parentloop.counter0 == last_ai_move.0 and forloop.counter0 == last_ai_move.1 %}ai-move{% endif %}">
+                        O
+                    </div>
+
+                {% else %}
+                    <a href="/move/{{forloop.parentloop.counter0}}/{{forloop.counter0}}/"
+                       class="cell empty"></a>
+                {% endif %}
+
+            {% endfor %}
+        </div>
     {% endfor %}
 </div>
 
@@ -37,25 +42,22 @@ body {
     text-align: center;
 }
 
-.title {
-    margin-top: 20px;
-}
-
-.turn {
-    margin-bottom: 15px;
-    opacity: 0.8;
-}
-
 /* BOARD */
 .board {
-    display: grid;
-    grid-template-columns: repeat(20, 28px);
-    justify-content: center;
+    display: flex;
+    flex-direction: column;
     gap: 3px;
     margin: 20px auto;
 }
 
-/* POLÍČKA */
+/* ROW */
+.row {
+    display: flex;
+    justify-content: center;
+    gap: 3px;
+}
+
+/* CELL */
 .cell {
     width: 28px;
     height: 28px;
@@ -68,10 +70,9 @@ body {
     transition: 0.15s;
 }
 
-/* prázdne políčko */
+/* empty */
 .cell.empty {
     background: #1e293b;
-    cursor: pointer;
 }
 
 .cell.empty:hover {
@@ -82,27 +83,40 @@ body {
 /* X */
 .cell.x {
     background: #ef4444;
-    color: white;
     animation: pop 0.2s ease-in-out;
 }
 
 /* O */
 .cell.o {
     background: #3b82f6;
-    color: white;
     animation: pop 0.2s ease-in-out;
 }
 
-/* animácia */
+/* AI MOVE HIGHLIGHT */
+.cell.ai-move {
+    background: orange !important;
+    animation: flash 0.5s ease-out;
+}
+
+/* animations */
 @keyframes pop {
     0% { transform: scale(0.5); opacity: 0; }
     100% { transform: scale(1); opacity: 1; }
 }
 
-/* winner text */
+@keyframes flash {
+    0% {
+        transform: scale(1.4);
+        box-shadow: 0 0 15px orange;
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: none;
+    }
+}
+
 .winner {
     color: #22c55e;
-    margin: 10px;
 }
 
 </style>
