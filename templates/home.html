@@ -7,7 +7,19 @@
 
 <body>
 
+<!-- ===================== -->
+<!-- SPOLOČNÝ NADPIS -->
+<!-- ===================== -->
+
 <h1>Vitaj v projekte Piškvorky 20x20</h1>
+
+<hr>
+
+<!-- ===================== -->
+<!-- GUEST / LOGOUT STAV -->
+<!-- ===================== -->
+
+{% if not user.is_authenticated %}
 
 <div class="content">
 
@@ -47,55 +59,73 @@
 
 <hr>
 
+<h2>🔐 Prihlásenie</h2>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Prihlásiť sa</button>
+</form>
+
+<p>
+    Nemáš účet?
+    <a href="{% url 'register' %}">Registrácia</a>
+</p>
+
+<hr>
+
+<!-- rovnaké ako pred loginom -->
+
+
+{% endif %}
+
+<!-- ===================== -->
+<!-- 🟢 LOGIN STAV -->
+<!-- ===================== -->
+
 {% if user.is_authenticated %}
 
-    <h2>Vitaj späť!</h2>
+<div class="content">
 
-    <p>Prihlásený ako: <b>{{ user.username }}</b></p>
+    <!-- ❌ TEXT SA ZRUŠÍ A NÁHRADÍ HRou -->
+    <h2>🎮 Hra sa načítava...</h2>
 
-    <a href="{% url 'game' %}">
-        <button>▶ Spustiť hru</button>
-    </a>
+    <div id="game-area">
+        <p>SEM BUDE HRA</p>
+    </div>
 
-    <form method="post" action="{% url 'logout' %}" style="display:inline;">
-        {% csrf_token %}
-        <button>🚪 Odhlásiť sa</button>
-    </form>
+</div>
 
-    <hr>
+<hr>
 
-    <h2>🏆 Top 10 hráči</h2>
+<h2>👋 Vitaj späť!</h2>
 
-    <table>
-        <tr>
-            <th>Hráč</th>
-            <th>Výhry</th>
-            <th>Prehry</th>
-        </tr>
+<p>Prihlásený ako: <b>{{ user.username }}</b></p>
 
-        {% for p in top_players %}
-        <tr>
-            <td>{{ p.user.username }}</td>
-            <td>{{ p.wins }}</td>
-            <td>{{ p.losses }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+<form method="post" action="{% url 'logout' %}" style="display:inline;">
+    {% csrf_token %}
+    <button>Odhlásiť sa</button>
+</form>
 
-{% else %}
+<hr>
 
-    <h2>🔐 Prihlásenie</h2>
+<h2>🏆 Štatistiky hráčov</h2>
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Prihlásiť sa</button>
-    </form>
+<table>
+    <tr>
+        <th>Hráč</th>
+        <th>Výhry</th>
+        <th>Prehry</th>
+    </tr>
 
-    <p>
-        Nemáš účet?
-        <a href="{% url 'register' %}" class="register-link">Registrácia</a>
-    </p>
+    {% for p in top_players %}
+    <tr>
+        <td>{{ p.user.username }}</td>
+        <td>{{ p.wins }}</td>
+        <td>{{ p.losses }}</td>
+    </tr>
+    {% endfor %}
+</table>
 
 {% endif %}
 
