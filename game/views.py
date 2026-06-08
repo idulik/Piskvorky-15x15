@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
+from django.contrib import messages
 
 import math
 
@@ -23,6 +24,12 @@ def home(request):
             user = form.get_user()
             login(request, user)
             return redirect("home")
+        
+        else:
+            messages.error(
+                request,
+                "Zadali ste nesprávne meno alebo heslo."
+            )
 
     return render(request, "home.html", {
         "form": form,

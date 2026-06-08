@@ -144,6 +144,14 @@
 
 {% endif %}
 
+{% if messages %}
+    {% for message in messages %}
+        <div class="message {{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
 <!-- ================= CSS ================= -->
 <style>
 
@@ -256,6 +264,16 @@ iframe {
     table {
         font-size: 12px;
     }
+}
+
+.message.success {
+    background: #22c55e;
+    color: black;
+}
+
+.message.error {
+    background: #ef4444;
+    color: white;
 }
 
 </style>
