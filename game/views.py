@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import PlayerStats
+from game.models import PlayerStats
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
@@ -14,10 +14,11 @@ import math
 def home(request):
     form = AuthenticationForm()
 
-    top_players = PlayerStats.objects.select_related("user").all().order_by('-wins', 'losses')[:10]
-    
+    top_players = PlayerStats.objects.select_related("user").order_by('-wins', 'losses')[:10]
+
     if request.method == "POST":
         form = AuthenticationForm(data=request.POST)
+
         if form.is_valid():
             user = form.get_user()
             login(request, user)
@@ -28,6 +29,14 @@ def home(request):
         "top_players": top_players
     })
 
+def login_view(request):
+    form = AuthenticationForm(request, data=request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        login(request, form.get_user())
+        return redirect("home")
+
+    return render(request, "login.html", {"form": form})
 
 def logout_view(request):
     logout(request)
