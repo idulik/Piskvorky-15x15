@@ -2,7 +2,6 @@
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Piškvorky 20x20</title>
 </head>
@@ -165,15 +164,15 @@ button {
 
 @media (max-width: 768px) {
     .cell {
-        width: 26px;
-        height: 26px;
+        width: 24px;
+        height: 24px;
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 400px) {
     .cell {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
     }
 }
 
@@ -183,27 +182,6 @@ button {
 
 </style>
 
-<script>
-document.querySelectorAll(".cell").forEach(cell => {
-    cell.addEventListener("click", function () {
-
-        const x = this.dataset.x;
-        const y = this.dataset.y;
-
-        window.location.href = `/move/${x}/${y}/`;
-    });
-
-    // lepšie pre mobil (touch optimalizácia)
-    cell.addEventListener("touchstart", function (e) {
-        e.preventDefault();
-
-        const x = this.dataset.x;
-        const y = this.dataset.y;
-
-        window.location.href = `/move/${x}/${y}/`;
-    }, { passive: false });
-});
-</script>
 
 </body>
 </html>
