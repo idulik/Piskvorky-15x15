@@ -12,6 +12,11 @@
     <h2 class="winner">Vyhral: {{ winner }}</h2>
 {% endif %}
 
+<form method="post" action="{% url 'reset' %}?from=home">
+        {% csrf_token %}
+        <button type="submit">🔄 Reštart hry</button>
+    </form>
+
 <div class="board">
     {% for row in board %}
         <div class="row">
@@ -34,11 +39,6 @@
         </div>
     {% endfor %}
 </div>
-
-<form method="post" action="{% url 'reset' %}?from=home">
-        {% csrf_token %}
-        <button type="submit">🔄 Reštart hry</button>
-    </form>
 
 <!--
 <h4>💻 Desktopová aplikácia</h4>
