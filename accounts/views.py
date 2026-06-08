@@ -7,7 +7,7 @@ from .forms import RegisterForm
 import traceback
 from game.models import PlayerStats
 
-def register(request):
+"""def register(request):
     success = False
 
     if request.method == "POST":
@@ -45,4 +45,29 @@ def register(request):
     return render(request, "register.html", {
         "form": form,
         "success": success
-    })
+    })"""
+
+def register(request):
+
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+
+        if form.is_valid():
+            user = form.save()
+
+            PlayerStats.objects.get_or_create(
+                user=user,
+                defaults={"wins": 0, "losses": 0}
+            )
+
+            messages.success(
+                request,
+                "Účet bol vytvorený. Môžeš sa prihlásiť."
+            )
+
+            return redirect("home")
+
+    else:
+        form = RegisterForm()
+
+    return render(request, "register.html", {"form": form})
