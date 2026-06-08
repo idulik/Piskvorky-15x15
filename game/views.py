@@ -62,20 +62,23 @@ def leaderboard(request):
 @login_required
 def game_view(request):
 
+    board = request.session.get("board")
+
     if (
-        "board" not in request.session
-        or len(request.session["board"]) != SIZE
-        or len(request.session["board"][0]) != SIZE
+        board is None
+        or len(board) != SIZE
+        or len(board[0]) != SIZE
     ):
-        request.session["board"] = [
+        board = [
             [None for _ in range(SIZE)]
             for _ in range(SIZE)
         ]
+        request.session["board"] = board
         request.session["winner"] = None
 
     return render(request, "game.html", {
-        "board": request.session["board"],
-        "winner": request.session["winner"],
+        "board": board,
+        "winner": request.session.get("winner"),
         "last_ai_move": request.session.get("last_ai_move")
     })
 
