@@ -25,12 +25,12 @@ def register(request):
                 success = True
 
             except Exception as e:
-                print("REGISTER SAVE ERROR:", e)
+                print("REGISTER SAVE ERROR:", repr(e))
                 traceback.print_exc()
 
         else:
             print("REGISTER INVALID")
-            print(form.errors)
+            print("FORM ERRORS:", form.errors.as_json())
 
     else:
         form = RegisterForm()
