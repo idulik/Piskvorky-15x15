@@ -571,7 +571,7 @@ def move(request, x, y):
 # =========================
 
 def reset(request):
-    request.session["board"] = [[None for _ in range(20)] for _ in range(20)]
+    request.session["board"] = [[None for _ in range(15)] for _ in range(15)]
     request.session["winner"] = None
     request.session["last_ai_move"] = None
     request.session.modified = True
