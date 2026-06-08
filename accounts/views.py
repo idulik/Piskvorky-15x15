@@ -28,9 +28,8 @@ def register(request):
                     defaults={"wins": 0, "losses": 0}
                 )
 
-                messages.success(request, "Účet bol vytvorený.")
-                success = True
-
+                messages.success(request, "Účet bol vytvorený. Môžete sa prihlásiť.")
+                
                 # ✔ PRESMEROVANIE
                 return redirect("home")
 
