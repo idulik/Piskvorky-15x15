@@ -520,11 +520,11 @@ def ai_move(board):
 def move(request, x, y):
 
     board = request.session.get("board")
-    winner = request.session.get("winner")
     if board is None:
         return redirect("game")
 
-    if winner:
+    # ak už je koniec hry → len redirect
+    if request.session.get("winner"):
         return redirect("game")
 
     if board[x][y] is None:
@@ -534,33 +534,27 @@ def move(request, x, y):
             request.session["winner"] = "X"
 
             if request.user.is_authenticated:
-                stats, created = PlayerStats.objects.get_or_create(
-                    user=request.user
-                )
+                stats, created = PlayerStats.objects.get_or_create(user=request.user)
                 stats.wins += 1
                 stats.save()
 
-            request.session["board"] = board
-            return redirect("game")
+        else:
+            # AI move iba ak človek nevyhral
+            ai_pos = ai_move(board)
 
-        # AI move
-        ai_pos = ai_move(board)
+            if ai_pos:
+                ax, ay = ai_pos
+                board[ax][ay] = AI
 
-        if ai_pos:
-            ax, ay = ai_pos
-            board[ax][ay] = AI
+                request.session["last_ai_move"] = (ax, ay)
 
-            request.session["last_ai_move"] = (ax, ay)
+                if check_winner_simple(board, ax, ay, AI):
+                    request.session["winner"] = "O"
 
-            if check_winner_simple(board, ax, ay, AI):
-                request.session["winner"] = "O"
-
-                if request.user.is_authenticated:
-                    stats, created = PlayerStats.objects.get_or_create(
-                        user=request.user
-                    ) 
-                    stats.losses += 1
-                    stats.save()
+                    if request.user.is_authenticated:
+                        stats, created = PlayerStats.objects.get_or_create(user=request.user)
+                        stats.losses += 1
+                        stats.save()
 
     request.session["board"] = board
     request.session.modified = True
