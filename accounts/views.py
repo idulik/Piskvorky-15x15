@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from .forms import RegisterForm
 import traceback
+from .models import PlayerStats
 
 def register(request):
     success = False
@@ -20,6 +21,12 @@ def register(request):
             try:
                 user = form.save()
                 print("USER SAVED:", user.username)
+
+                # 🔥 DÔLEŽITÉ (ak používaš leaderboard)
+                PlayerStats.objects.get_or_create(
+                    user=user,
+                    defaults={"wins": 0, "losses": 0}
+                )
 
                 messages.success(request, "Účet bol vytvorený.")
                 success = True
