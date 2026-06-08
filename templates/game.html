@@ -12,10 +12,10 @@
     <h2 class="winner">Vyhral: {{ winner }}</h2>
 {% endif %}
 
-<form method="post" action="{% url 'reset' %}?from=home">
-        {% csrf_token %}
-        <button type="submit">🔄 Reštart hry</button>
-    </form>
+<form method="post" action="{% url 'reset' %}">
+    {% csrf_token %}
+    <button type="submit">🔄 Reštart hry</button>
+</form>
 
 <div class="board">
     {% for row in board %}
@@ -183,6 +183,11 @@ button {
 
 </style>
 
+{% if notify_home %}
+<script>
+    window.parent.refreshLeaderboard();
+</script>
+{% endif %}
 
 </body>
 </html>

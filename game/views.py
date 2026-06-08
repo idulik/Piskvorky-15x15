@@ -572,4 +572,8 @@ def reset(request):
     request.session["last_ai_move"] = None
     request.session.modified = True
 
-    return redirect("game")   # vždy iba sem
+    return render(request, "game.html", {
+        "board": request.session["board"],
+        "winner": None,
+        "notify_home": True
+    })
