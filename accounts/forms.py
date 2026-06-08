@@ -40,4 +40,4 @@ class RegisterForm(UserCreationForm):
                 "Nezadali ste rovnaké heslo. Vytvorte si heslo ešte raz a zopakujte rovnaké heslo."
             )
 
-    return cleaned_data
+        return cleaned_data
