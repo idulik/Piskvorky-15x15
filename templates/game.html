@@ -32,7 +32,9 @@
 
                 {% else %}
                     <a href="/move/{{forloop.parentloop.counter0}}/{{forloop.counter0}}/"
-                       class="cell empty"></a>
+                        class="cell empty"
+                        onclick="this.classList.add('x'); this.innerText='X';">
+                    </a>
                 {% endif %}
 
             {% endfor %}
