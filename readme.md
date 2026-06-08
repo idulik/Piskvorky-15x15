@@ -1,4 +1,4 @@
-# Piškvorky 20x20 – Hybrid Gaming Platform
+# Piškvorky 15x15 – Hybrid Gaming Platform
 
 Cross-platform hra vytvorená pomocou Django (web aplikácia), Pygame (desktop klient) a REST API synchronizácie.
 
@@ -183,7 +183,7 @@ def win_rate(self):
 ┌──────────────────────────────────────────────┐
 │ IF USER LOGGED IN                            │
 │                                              │
-│                20x20 GRID                    │
+│                15x15 GRID                    │
 │                                              │
 │ Status: Player X turn                        │
 │ Rule: 5 in a row wins                        │
