@@ -46,6 +46,13 @@
             <label>Opakuj heslo:</label>
             {{ form.password2 }}
         </div>
+        {% if form.password2.errors %}
+            <div class="message error">
+                {% for error in form.password2.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
         <div style="font-size: 12px;">
             Tvoje heslo musí:
             <ul>
@@ -145,6 +152,12 @@
     font-weight: bold;
     text-align: center;
     }
+
+    .error {
+    background: #dc2626;
+    color: white;
+    margin-top: 10px;
+}
 
 </style>
 

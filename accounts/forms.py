@@ -28,3 +28,16 @@ class RegisterForm(UserCreationForm):
             self.save_m2m()
 
         return user
+    
+    def clean(self):
+    cleaned_data = super().clean()
+
+    password1 = cleaned_data.get("password1")
+    password2 = cleaned_data.get("password2")
+
+    if password1 and password2 and password1 != password2:
+        raise ValidationError(
+            "Nezadali ste rovnaké heslo. Vytvorte si heslo ešte raz a zopakujte rovnaké heslo."
+        )
+
+    return cleaned_data
