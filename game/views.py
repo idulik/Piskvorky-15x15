@@ -9,6 +9,14 @@ from django.contrib import messages
 import math
 
 # =========================
+# GAME CONSTANTS
+# =========================
+
+SIZE = 15
+AI = "O"
+HUMAN = "X"
+
+# =========================
 # AUTH
 # =========================
 
@@ -62,7 +70,8 @@ def leaderboard(request):
 @login_required
 def game_view(request):
 
-    board = request.session.get("board")
+    board = request.session.get("board", None)
+    notify_home = request.session.pop("notify_home", False)
 
     if (
         board is None
@@ -79,17 +88,9 @@ def game_view(request):
     return render(request, "game.html", {
         "board": board,
         "winner": request.session.get("winner"),
-        "last_ai_move": request.session.get("last_ai_move")
+        "last_ai_move": request.session.get("last_ai_move"),
+        "notify_home": notify_home
     })
-
-
-# =========================
-# GAME CONSTANTS
-# =========================
-
-SIZE = 15
-AI = "O"
-HUMAN = "X"
 
 
 # =========================
@@ -567,7 +568,7 @@ def move(request, x, y):
     request.session.modified = True
 
     return redirect("game")
-
+    
 
 # =========================
 # RESET
@@ -580,6 +581,8 @@ def reset(request):
     ]
     request.session["winner"] = None
     request.session["last_ai_move"] = None
+
+    request.session["notify_home"] = True
 
     request.session.modified = True
 
