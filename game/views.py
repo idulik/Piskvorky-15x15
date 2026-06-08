@@ -62,10 +62,14 @@ def leaderboard(request):
 @login_required
 def game_view(request):
 
-    if "board" not in request.session:
+    if (
+        "board" not in request.session
+        or len(request.session["board"]) != SIZE
+        or len(request.session["board"][0]) != SIZE
+    ):
         request.session["board"] = [
-            [None for _ in range(20)]
-            for _ in range(20)
+            [None for _ in range(SIZE)]
+            for _ in range(SIZE)
         ]
         request.session["winner"] = None
 
@@ -571,6 +575,7 @@ def reset(request):
     request.session["winner"] = None
     request.session["last_ai_move"] = None
     request.session.modified = True
+    request.session.flush()
 
     return render(request, "game.html", {
         "board": request.session["board"],
