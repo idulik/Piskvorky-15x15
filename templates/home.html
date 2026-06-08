@@ -126,20 +126,20 @@
 
     {% for p in top_players %}
     <tr>
-        <td>{{ player.user.username }}</td>
-        <td>{{ player.wins }}</td>
-        <td>{{ player.losses }}</td>
+        <td>{{ p.user.username }}</td>
+        <td>{{ p.wins }}</td>
+        <td>{{ p.losses }}</td>
         <td>
-            {% if player.win_rate >= 70 %}
-                🟢 {{ player.win_rate }}%
+            {% if p.win_rate >= 70 %}
+                🟢 {{ p.win_rate }}%
             {% elif p.win_rate >= 40 %}
-                🟡 {{ player.win_rate }}%
+                🟡 {{ p.win_rate }}%
             {% else %}
-                🔴 {{ player.win_rate }}%
+                🔴 {{ p.win_rate }}%
             {% endif %}
         </td>
     </tr>
-    {% endfor %}
+{% endfor %}
 </table>
 
 {% endif %}
