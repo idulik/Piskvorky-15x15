@@ -80,7 +80,7 @@ def game_view(request):
 # GAME CONSTANTS
 # =========================
 
-SIZE = 20
+SIZE = 15
 AI = "O"
 HUMAN = "X"
 

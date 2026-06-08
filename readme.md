@@ -6,7 +6,7 @@ Cross-platform hra vytvorená pomocou Django (web aplikácia), Pygame (desktop k
 
 # Cieľ projektu
 
-Cieľom projektu je vytvoriť jednoduchú single-player hru Piškvorky 20x20, kde hráč hrá proti počítaču (AI). Hra bude dostupná ako webová aplikácia a desktop verzia, pričom výsledky sa budú synchronizovať na server.
+Cieľom projektu je vytvoriť jednoduchú single-player hru Piškvorky 15x15, kde hráč hrá proti počítaču (AI). Hra bude dostupná ako webová aplikácia a desktop verzia, pričom výsledky sa budú synchronizovať na server.
 
 ---
 
@@ -17,7 +17,7 @@ Cieľom projektu je vytvoriť jednoduchú single-player hru Piškvorky 20x20, kd
 1. Používateľ otvorí web.
 2. Vidí:
 
-   * názov hry: Piškvorky 20x20
+   * názov hry: Piškvorky 15x15
    * úvodný text
    * leaderboard (TOP 10 hráčov)
    * tlačidlá Login / Register
@@ -32,7 +32,7 @@ Cieľom projektu je vytvoriť jednoduchú single-player hru Piškvorky 20x20, kd
 
 Po prihlásení sa zobrazí:
 
-* hracia plocha 20x20
+* hracia plocha 15x15
 * leaderboard
 * tlačidlo na stiahnutie desktop verzie
 
@@ -148,7 +148,7 @@ def win_rate(self):
 
 * user_id
 * result
-* board_size = 20
+* board_size = 15
 * moves_count
 * timestamp
 
@@ -161,12 +161,12 @@ def win_rate(self):
 ```text
 ┌──────────────────────────────────────────────┐
 │ HEADER                                       │
-│ Piškvorky 20x20 | Home | Login | Register    │
+│ Piškvorky 15x15 | Home | Login | Register    │
 └──────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────┐
 │ INTRO TEXT                                   │
-│ Spoj 5 v rade na 20x20 poli                  │
+│ Spoj 5 v rade na 15x15 poli                  │
 └──────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────┐
@@ -227,7 +227,7 @@ Výsledok:
 
 ## Fáza 3 – Web hra
 
-* 20x20 grid
+* 15x15 grid
 * klikateľná mriežka
 * X/O systém
 * kontrola 5 v rade
