@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.contrib import messages
 from .forms import RegisterForm
 import traceback
-from .models import PlayerStats
+from game.models import PlayerStats
 
 def register(request):
     success = False
