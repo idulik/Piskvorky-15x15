@@ -30,7 +30,7 @@ class RegisterForm(UserCreationForm):
         return user
     
     def clean(self):
-    cleaned_data = super().clean()
+        cleaned_data = super().clean()
 
     password1 = cleaned_data.get("password1")
     password2 = cleaned_data.get("password2")
