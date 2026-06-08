@@ -14,8 +14,9 @@ import math
 def home(request):
     form = AuthenticationForm()
 
-    top_players = PlayerStats.objects.select_related("user").all().order_by('-wins', 'losses')[:10]
-
+    """top_players = PlayerStats.objects.select_related("user").all().order_by('-wins', 'losses')[:10]"""
+    top_players = []
+    
     if request.method == "POST":
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
