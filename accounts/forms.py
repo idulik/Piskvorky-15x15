@@ -22,7 +22,7 @@ class RegisterForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data.get("email")
 
-    if User.objects.filter(email=email).exists():
-        raise ValidationError("Email už existuje")
+        if User.objects.filter(email=email).exists():
+            raise ValidationError("Email už existuje")
 
-    return email
+        return email
