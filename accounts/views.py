@@ -48,7 +48,6 @@ from game.models import PlayerStats
     })"""
 
 def register(request):
-
     if request.method == "POST":
         form = RegisterForm(request.POST)
 
@@ -60,11 +59,13 @@ def register(request):
                 defaults={"wins": 0, "losses": 0}
             )
 
+            # ✔ HLÁŠKA
             messages.success(
                 request,
                 "Účet bol vytvorený. Môžeš sa prihlásiť."
             )
 
+            # ✔ PRESMEROVANIE
             return redirect("home")
 
     else:
