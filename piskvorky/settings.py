@@ -27,7 +27,9 @@ SECRET_KEY = 'django-insecure-p3msetgbkuo6ue7axf$7kltgh8^*3h-kg1vjenzs*sv6**vm*8
 
 import os
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+"""DEBUG = os.environ.get("DEBUG", "False") == "True""""
+
+DEBUG = True
 
 RENDER_HOST = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
 
